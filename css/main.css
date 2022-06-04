@@ -1,0 +1,33 @@
+html{
+    height: 100%;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+}
+
+body{
+    height: 100%;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    background-color: #000;
+}
+
+html, body {
+    overflow: hidden;
+}
+
+#canvas{
+    height: 100%;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+}
+
+#stop{
+    z-index: 10;
+    position: absolute;
+    left: 50%;
+    bottom: 2em;
+    padding: 2em;
+}
