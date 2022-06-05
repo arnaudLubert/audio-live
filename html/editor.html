@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Audio Live - Editor</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" media="screen" href="../css/editor.css">
+    <script type="text/javascript" src="../js/draw_utils.js"></script>
+</head>
+<body>
+    <div id="config-left">
+        <select id="object-type">
+            <option value="0">Line</option>
+            <option value="1">Rect</option>
+            <option value="2">Triangle</option>
+            <option value="3">Custom points</option>
+            <option value="4">UHW</option>
+            <option value="5">Line visualizer</option>
+        </select>
+        <button onclick="addObject()">Add</button>
+
+        <div id="hierarchy"></div>
+
+        <button onclick="duplicateObject()">Duplicate</button>
+        <button onclick="removeObject()">Remove</button>
+        <button id="save-scene" onclick="saveScene()">Save scene</button>
+        <input id="scene-name" type="text" value="Scene" placeholder="Scene name"/>
+    </div>
+
+    <div id="config-right">
+        <h3 id="frame-name">(Frame 1)</h3>
+        <h3>Position</h3>
+        <input id="object-position-x" type="range" step="0.05" min="0.0" max="1.0" value="0.5"/>
+        <input id="object-position-y" type="range" step="0.05" min="0.0" max="1.0" value="0.5"/>
+        <h3>Size</h3>
+        <input id="object-size-x" type="range" step="0.05" min="0.0" max="1.0" value="0.5"/>
+        <input id="object-size-y" type="range" step="0.05" min="0.0" max="1.0" value="0.5"/>
+        <h3>Rotate</h3>
+        <input id="object-angle" type="range" step="0.05" min="0.0" max="1.0" value="0.0"/>
+        <h3>Opacity</h3>
+        <input id="object-opacity" type="range" step="0.01" min="0" max="1" value="0"/>
+
+        <div class="separator"></div>
+        <h3>(Visualizer)</h3>
+        <h3>Frequency range [0-1]</h3>
+        <input id="object-visualizer-range-start" type="number" step="0.05" min="0.0" max="1.0" value="0.0"/>
+        <input id="object-visualizer-range-end" type="number" step="0.05" min="0.0" max="1.0" value="1.0"/>
+        <h3>Reverse</h3>
+        <input id="object-visualizer-reverse" type="checkbox"/>
+
+        <div class="separator"></div>
+        <h3>(Animation)</h3>
+        <h3>Activation</h3>
+        <select id="object-animation-activation">
+            <option value="0">[1] Bass</option>
+            <option value="1">[2] Bass</option>
+            <option value="2">[3] Mid</option>
+            <option value="3">[4] Mid</option>
+            <option value="4">[5] Treble</option>
+            <option value="5">[6] Treble</option>
+            <option value="6">BPM</option>
+        </select>
+        <h3>Loop</h3>
+        <select id="object-animation-loop">
+            <option value="0">One-shot</option>
+            <option value="1">Forward <-> backward</option>
+        </select>
+    </div>
+
+    <div id="config-bottom">
+        <div>
+            <div>
+                <h2>Real-time</h2>
+                <input id="real-time" type="checkbox"/>
+            </div>
+            <div>
+                <h2>BPM</h2>
+                <input id="bpm" type="number" step="1" min="80" max="170" value="120"/>
+            </div>
+            <div>
+                <h2>Music type</h2>
+                <select id="description">
+                    <option value="0">Chill / Low bass</option>
+                    <option value="1">Base</option>
+                    <option value="2">Peak / High</option>
+                </select>
+            </div>
+        </div>
+        <div>
+            <input id="animation-frame" type="range" step="0.01" min="0" max="1" value="0"/>
+            <div id="frame-buttons">
+                <button id="frame-button-1" onclick="setFrame(0, true)">Frame 1</button>
+                <span></span>
+                <button id="frame-button-2" onclick="setFrame(1, true)">Frame 2</button>
+            </div>
+            <button id="save-frame" class="save-frame">Duplicate frame 1</button>
+        </div>
+    </div>
+
+    <canvas id="canvas"></canvas>
+    <script type="text/javascript" src="../js/editor.js"></script>
+</body>
+</html>

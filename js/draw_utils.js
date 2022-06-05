@@ -3,7 +3,7 @@ function drawLine(x, y, width, angle) {
     canvas.rotate(angle * Math.PI * 2);
 
     canvas.beginPath();
-    const length = config.height * width / 2;
+    const length = config.width * width / 2;
     canvas.moveTo(-length, 0)
     canvas.lineTo(length, 0);
     canvas.stroke();
@@ -13,8 +13,8 @@ function drawLine(x, y, width, angle) {
 }
 
 function drawLineVisuilizer(audioData, x, y, width, height, angle, dataOffset, dataSize, reverse) {
-    const limits = [-config.height * width / 2, config.height * width, 0, config.height * height * 2];
-    const barSize = config.height * width / dataSize;
+    const limits = [-config.width * width / 2, config.width * width, 0, config.width * height];
+    const barSize = config.width * width / dataSize;
 
     canvas.translate(config.width * x, config.height * y);
     canvas.rotate(angle * Math.PI * 2);
@@ -41,7 +41,7 @@ function drawRect(x, y, width, height, angle) {
     canvas.translate(config.width * x, config.height * y);
     canvas.rotate(angle * Math.PI * 2);
 
-    const lengths = [config.height * width, config.height * height];
+    const lengths = [config.width * width, config.width * height];
     canvas.strokeRect(-lengths[0] / 2, -lengths[1] / 2, lengths[0], lengths[1]);
 
     canvas.rotate(-angle * Math.PI * 2);
@@ -52,7 +52,7 @@ function drawTriangle(x, y, width, height, angle) {
     canvas.translate(config.width * x, config.height * y);
     canvas.rotate(angle * Math.PI * 2);
 
-    const lengths = [config.height * width / 2, config.height * height * 0.37];
+    const lengths = [config.width * width / 2, config.width * height * 0.37];
     canvas.beginPath();
     canvas.moveTo(-lengths[0], lengths[1]);
     canvas.lineTo(0, -lengths[1]);
