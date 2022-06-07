@@ -4,6 +4,9 @@
     <title>Audio Live - Editor</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" sizes="8x8" href="../img/favicon-8.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../img/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="128x128" href="../img/favicon-128.png">
     <link rel="stylesheet" type="text/css" media="screen" href="../css/editor.css">
     <script type="text/javascript" src="../js/draw_utils.js"></script>
 </head>
@@ -16,6 +19,7 @@
             <option value="3">Custom points</option>
             <option value="4">UHW</option>
             <option value="5">Line visualizer</option>
+            <option value="6">Pikes visualizer</option>
         </select>
         <button onclick="addObject()">Add</button>
 
@@ -52,38 +56,46 @@
         <h3>(Animation)</h3>
         <h3>Activation</h3>
         <select id="object-animation-activation">
-            <option value="0">[1] Bass</option>
-            <option value="1">[2] Bass</option>
-            <option value="2">[3] Mid</option>
-            <option value="3">[4] Mid</option>
-            <option value="4">[5] Treble</option>
-            <option value="5">[6] Treble</option>
-            <option value="6">BPM</option>
+            <option value="0">BPM</option>
+            <option value="1">[1] Bass</option>
+            <option value="2">[2] Bass</option>
+            <option value="3">[3] Mid</option>
+            <option value="4">[4] Mid</option>
+            <option value="6">[5] Treble</option>
+            <option value="7">[6] Treble</option>
         </select>
         <h3>Loop</h3>
         <select id="object-animation-loop">
-            <option value="0">One-shot</option>
-            <option value="1">Forward <-> backward</option>
+            <option value="0">[1] One-shot</option>
+            <option value="1">[2] One-shot</option>
+            <option value="2">[2] Forward <-> backward</option>
+            <option value="3">[4] One-shot</option>
+            <option value="4">[4] Forward <-> backward</option>
         </select>
     </div>
 
     <div id="config-bottom">
         <div>
             <div>
-                <h2>Real-time</h2>
-                <input id="real-time" type="checkbox"/>
+                <div>
+                    <h2>Real-time</h2>
+                    <input id="real-time" type="checkbox"/>
+                </div>
+                <div>
+                    <h2>BPM</h2>
+                    <input id="bpm" type="number" step="1" min="80" max="170" value="120"/>
+                </div>
+                <div>
+                    <h2>Music type</h2>
+                    <select id="description">
+                        <option value="0">Chill / Low bass</option>
+                        <option value="1" selected>Base</option>
+                        <option value="2">Peak / High</option>
+                    </select>
+                </div>
             </div>
             <div>
-                <h2>BPM</h2>
-                <input id="bpm" type="number" step="1" min="80" max="170" value="120"/>
-            </div>
-            <div>
-                <h2>Music type</h2>
-                <select id="description">
-                    <option value="0">Chill / Low bass</option>
-                    <option value="1">Base</option>
-                    <option value="2">Peak / High</option>
-                </select>
+                <input id="loop-progress" type="range" step="0.01" min="0" max="4" value="0"/>
             </div>
         </div>
         <div>

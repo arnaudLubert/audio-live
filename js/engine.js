@@ -64,8 +64,8 @@ function loop() {
     splitFreqAverage();
     storeBPM(now);
 
-    // drawVisualizer();
-    draw();
+     drawVisualizer();
+    //draw();
 
     if (config.run)
         requestAnimationFrame(loop);

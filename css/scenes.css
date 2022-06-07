@@ -1,33 +1,52 @@
-html{
-    height: 100%;
-    width: 100%;
-    padding: 0;
-    margin: 0;
-}
-
 body{
-    height: 100%;
-    width: 100%;
-    padding: 0;
-    margin: 0;
     background-color: #000;
 }
 
-html, body {
-    overflow: hidden;
+#file-picker{
+    display: none;
 }
 
-#canvas{
-    height: 100%;
-    width: 100%;
-    padding: 0;
-    margin: 0;
+#list{
+    background-color: #2e2e2e;
+    overflow-y: auto;
 }
 
-#stop{
-    z-index: 10;
-    position: absolute;
-    left: 50%;
-    bottom: 2em;
-    padding: 2em;
+#list > div{
+    padding: 0.5em;
+    font-size: larger;
+    display: flex;
+    cursor: pointer;
+    border-bottom: 2px solid #000;
+}
+
+#list > div:hover{
+    background-color: #404040;
+}
+
+#list > div > *{
+    flex: 1;
+}
+
+#list > div > :nth-child(3) {
+    flex: 0.4;
+}
+#list > div > :nth-child(2) {
+    flex: 2;
+}
+
+#list > div > :last-child{
+    margin-left: 1em;
+}
+
+#load-file {
+    background: #2e2e2e;
+    padding: 1em;
+    text-align: center;
+    border-bottom: 4px solid #FFF;
+    font-size: larger;
+    display: flex;
+}
+
+#load-file > span{
+    flex: 1;
 }

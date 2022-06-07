@@ -1,3 +1,5 @@
+const loopProgress = document.getElementById('loop-progress');
+const animationFrame = document.getElementById('animation-frame');
 const canv = document.getElementById('canvas', {alpha: false});
 const canvas = canv.getContext('2d');
 
@@ -12,10 +14,9 @@ let config = {
 const AUDIO_DATA_SIZE = 50;
 let currentFrame = 0;
 let selectedObject = null;
+let animationFrameTriggered = false;
 let objects = [];
 
-canvas.fillStyle = 'white';
-canvas.strokeStyle = 'white';
 canvas.lineWidth = 4;
 
 function draw() {
@@ -25,18 +26,30 @@ function draw() {
     const splitFreqs = [audioData[7], audioData[14], audioData[21], audioData[28], audioData[35], audioData[42]];
     let position, size, angle, frameValue, opacity, color;
 
-    if ( !config.realTime)
-        frameValue = document.getElementById('animation-frame').value;
-
     for (const object of objects) {
-        if (config.realTime) {
-            if (object.animation.activation < 6)
-                frameValue = splitFreqs[object.animation.activation];
+        if ( !config.realTime && animationFrameTriggered && selectedObject && selectedObject == object)
+            frameValue = animationFrame.value;
+        else {
+            if (object.animation.activation !== 0)
+                frameValue = splitFreqs[object.animation.activation - 1];
             else {
-                if (object.animation.loop)
-                    frameValue = audioDataGenerateSeed < 1.0 ? audioDataGenerateSeed : 2 - audioDataGenerateSeed;
-                else
-                    frameValue = audioDataGenerateSeed % 1.0;
+                switch (object.animation.loop) {
+                    case 0:
+                        frameValue = audioDataGenerateSeed % 1.0;
+                        break;
+                    case 1:
+                        frameValue = audioDataGenerateSeed % 2.0 / 2;
+                        break;
+                    case 2:
+                        frameValue = audioDataGenerateSeed % 2 < 1.0 ? audioDataGenerateSeed % 2 : 2 - audioDataGenerateSeed % 2;
+                        break;
+                    case 3:
+                        frameValue = audioDataGenerateSeed / 4;
+                        break;
+                    case 4:
+                        frameValue = (audioDataGenerateSeed < 2.0 ? audioDataGenerateSeed : 4 - audioDataGenerateSeed) / 2;
+                        break;
+                }
             }
         }
 
@@ -53,9 +66,10 @@ function draw() {
             case 0: drawLine(position.x, position.y, size.x, angle); break;
             case 1: drawRect(position.x, position.y, size.x, size.y, angle); break;
             case 2: drawTriangle(position.x, position.y, size.x, size.y, angle); break;
-        //    case 3: drawPath(object.points); break;
+            //    case 3: drawPath(object.points); break;
             case 4: drawUHW(position.x, position.y, size.x, size.y, angle); break;
             case 5: drawLineVisuilizer(audioData, position.x, position.y, size.x, size.y, angle, Math.round(audioData.length * object.visualizer.range[0]), Math.round(audioData.length * (object.visualizer.range[1] - object.visualizer.range[0])), object.visualizer.reverse); break;
+            //    case 6: drawPikesVisuilizer(object.points); break;
         }
     }
 
@@ -86,7 +100,7 @@ function addObject() {
         },
         animation: {
             activation: 3,
-            loop: 1
+            loop: 2
         }
     };
     createObject(object);
@@ -190,15 +204,18 @@ function getAlphaColor(color, opacity) {
 function setFrame(frame, overrideSlider = false) {
     currentFrame = frame;
 
-    if (overrideSlider)
-        document.getElementById('animation-frame').value = currentFrame;
+    if (overrideSlider) {
+        animationFrame.value = currentFrame;
+        animationFrameTriggered = true;
+        draw();
+    }
     updateSaveFrameButton();
     loadObjectData();
 }
 
 function updateSaveFrameButton() {
-    const value = document.getElementById('animation-frame').value;
-    document.getElementById('save-frame').innerText = 'Duplicate frame ' + (value > 0.5 ? 2 : 1);
+    const value = animationFrame.value;
+    document.getElementById('save-frame').innerText = 'Overrite frame ' + (value > 0.5 ? 1 : 2);
     document.getElementById('frame-name').innerText = '(Frame ' + (value > 0.5 ? 2 : 1) + ')';
 }
 
@@ -209,10 +226,10 @@ function generateAudioData() {
     let step = audioDataGenerateSeed;
 
     for (let i = 0; i !== AUDIO_DATA_SIZE; i++) {
-        audioData[i] = (1 + Math.sin(step * Math.PI)) / 2;
+        audioData[i] = (1 + Math.sin(step % 2 * Math.PI)) / 2;
         step += 0.1;
 
-        if (step > 2.0)
+        if (step > 4.0)
             step = 0;
     }
     return audioData;
@@ -223,8 +240,10 @@ function loopBPM() {
 
     audioDataGenerateSeed += 0.1;
 
-    if (audioDataGenerateSeed > 2.0)
+    if (audioDataGenerateSeed > 4.0)
         audioDataGenerateSeed = 0;
+
+    loopProgress.value = audioDataGenerateSeed;
 
     if (config.realTime)
         window.setTimeout(loopBPM, timeout);
@@ -257,14 +276,24 @@ function setSelectValue(select, value) {
 }
 
 function initListeners() {
-    document.getElementById('animation-frame').addEventListener('change', (e) => {
+    animationFrame.addEventListener('change', (e) => {
         setFrame((e.target.value > 0.5) ? 1 : 0);
     });
-    document.getElementById('animation-frame').addEventListener('input', (e) => {
+    animationFrame.addEventListener('input', (e) => {
         if (config.realTime) {
             config.realTime = false;
             document.getElementById('real-time').checked = false;
         }
+        animationFrameTriggered = true;
+        draw();
+    });
+    loopProgress.addEventListener('input', (e) => {
+        if (config.realTime) {
+            config.realTime = false;
+            document.getElementById('real-time').checked = false;
+        }
+        animationFrameTriggered = false;
+        audioDataGenerateSeed = parseFloat(loopProgress.value);
         draw();
     });
     document.getElementById('object-position-x').addEventListener('input', (e) => {
@@ -345,11 +374,14 @@ function initListeners() {
         selectedObject.frames[frameDest].size.x = selectedObject.frames[currentFrame].size.x;
         selectedObject.frames[frameDest].size.y = selectedObject.frames[currentFrame].size.y;
         selectedObject.frames[frameDest].angle = selectedObject.frames[currentFrame].angle;
+        selectedObject.frames[frameDest].opacity = selectedObject.frames[currentFrame].opacity;
         draw();
     });
 
     document.getElementById('real-time').addEventListener('change', (e) => {
         config.realTime = e.target.checked;
+
+        animationFrameTriggered = false;
 
         if (config.realTime)
             loopBPM();
@@ -361,11 +393,20 @@ function initListeners() {
             return;
         config.bpm = parseFloat(e.target.value);
     });
+
+    window.addEventListener('resize', () => {
+        canv.width = canv.clientWidth * 2;
+        canv.height = canv.clientHeight * 2;
+        config.width = canv.width;
+        config.height = canv.height;
+        canvas.lineWidth = 4;
+        draw();
+    });
 }
 initListeners();
 
 let localStorage = window.localStorage;
-// localStorage.removeItem('last-session');
+
 function initScene() {
     const rawStorage = localStorage.getItem('scenes');
     let scenes = rawStorage ? JSON.parse(rawStorage) : [];
@@ -401,7 +442,6 @@ function initScene() {
             }
         }
     }
-
     draw();
 }
 initScene();
@@ -434,6 +474,7 @@ function saveScene() {
             scenes[sceneRealID].objects = objects;
             scenes[sceneRealID].type = parseInt(type.options[type.selectedIndex].value);
             scenes[sceneRealID].bpm = parseInt(document.getElementById('bpm').value);
+            scenes[sceneRealID].hash = generateHash(objects, scenes[sceneRealID].type);
             dataReplaced = true;
         }
     }
@@ -442,17 +483,30 @@ function saveScene() {
         if (name !== '')
             name = getUniqueSceneName(scenes, name);
 
-        const scene = {
+        let scene = {
             id: getUniqueSceneID(scenes),
             name: name,
             objects: objects,
             type: parseInt(type.options[type.selectedIndex].value),
-            bpm: parseInt(document.getElementById('bpm').value)
+            bpm: parseInt(document.getElementById('bpm').value),
+            date: (new Date()).getTime(),
+            hash: ''
         };
+        scene.hash = generateHash(objects, scene.type);
         scenes.push(scene);
     }
     localStorage.setItem('scenes', JSON.stringify(scenes));
     window.location.pathname += '/../scenes.html';
+}
+
+function generateHash(objects, type) {
+    let hash = type * 1234567;
+
+    for (let i = objects.length - 1; i !== -1; i--) {
+        hash += i * 1000 + objects[i].type * 5 + objects[i].frames[0].position.x * 30 + objects[i].frames[0].position.y * 82 + objects[i].frames[0].size.x * 4 + objects[i].frames[0].size.y * 34 + objects[i].frames[0].angle * 19 + objects[i].frames[0].opacity * 91 + objects[i].frames[1].position.x * 89 + objects[i].frames[1].position.y * 25 + objects[i].frames[1].size.x * 9 + objects[i].frames[1].size.y * 96 + objects[i].frames[1].angle * 59 + objects[i].frames[1].opacity * 43 + objects[i].visualizer.range[0] * 26 + objects[i].visualizer.range[1] * 39 + (objects[i].visualizer.reverse ? 1 : 0) + objects[i].animation.activation * 40 + objects[i].animation.loop * 50;
+    }
+
+    return hash.toString(36);
 }
 
 function getUniqueSceneID(scenes) {

@@ -6,6 +6,7 @@ html{
 }
 
 body{
+    font-family: monospace;
     height: 100%;
     width: 100%;
     padding: 0;
@@ -30,8 +31,13 @@ button:hover{
     border: 1px solid #FFF;
 }
 
+select, button{
+    font-family: monospace;
+}
+
 input {
     text-align: center;
+    font-family: monospace;
 }
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
@@ -105,12 +111,13 @@ input[type=number] {
 #config-right{
     background-color: #2e2e2e;
     width: 15vw;
-    height: 100%;
+    height: calc(100% - 4em);
     position: absolute;
     right: 0;
     top: 0;
     text-align: center;
     padding: 2em 0;
+    overflow-y: auto;
 }
 
 #config-right > h2:first-child {
@@ -139,7 +146,6 @@ input[type=number] {
     flex: 1;
     padding: 1em 1em;
     border-right: 2px solid #FFF;
-    display: flex;
 }
 
 #config-bottom > div:last-child{
@@ -148,7 +154,16 @@ input[type=number] {
 }
 
 #config-bottom > div:first-child > div{
+    display: flex;
+}
+
+#config-bottom > div:first-child > div > div {
     flex: 1;
+}
+
+#loop-progress{
+    margin-top: 2em;
+    width: 100%;
 }
 
 #animation-frame{
