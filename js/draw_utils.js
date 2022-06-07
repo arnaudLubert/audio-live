@@ -1,3 +1,10 @@
+
+function getAlphaColor(color, opacity) {
+    const op = (Math.round(opacity * 255)).toString(16);
+
+    return (op.length === 2) ? color + op : color + '0' + op;
+}
+
 function drawLine(x, y, width, angle) {
     canvas.translate(config.width * x, config.height * y);
     canvas.rotate(angle * Math.PI * 2);

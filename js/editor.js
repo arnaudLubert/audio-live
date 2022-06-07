@@ -12,6 +12,7 @@ let config = {
 }
 
 const AUDIO_DATA_SIZE = 50;
+const TAN_TARGET = 0.4371671;
 let currentFrame = 0;
 let selectedObject = null;
 let animationFrameTriggered = false;
@@ -30,8 +31,10 @@ function draw() {
         if ( !config.realTime && animationFrameTriggered && selectedObject && selectedObject == object)
             frameValue = animationFrame.value;
         else {
-            if (object.animation.activation !== 0)
-                frameValue = splitFreqs[object.animation.activation - 1];
+            if (object.animation.activation === 1)
+                frameValue = 0.0;
+            else if (object.animation.activation > 1)
+                frameValue = splitFreqs[object.animation.activation - 2];
             else {
                 switch (object.animation.loop) {
                     case 0:
@@ -51,6 +54,24 @@ function draw() {
                         break;
                 }
             }
+
+            if (object.animation.decay) {
+                frameValue += object.animation.decay * 0.25;
+
+                if (frameValue > 1)
+                    frameValue -= 1;
+            }
+
+            switch (object.animation.function) {
+                case 1: frameValue = Math.pow(frameValue, 2); break;
+                case 2: frameValue = Math.pow(frameValue, 4); break;
+                case 3: frameValue = Math.pow(frameValue, 8); break;
+                case 4: frameValue = Math.cos((1 - frameValue) * Math.PI) / 2 + 0.5; break;
+                case 5: frameValue = Math.tan((frameValue * 2 - 1) * Math.PI * TAN_TARGET) / 10 + 0.5; break;
+            }
+
+            if (object.animation.reverse)
+                frameValue = 1.0 - frameValue;
         }
 
         position = {x: object.frames[0].position.x + (object.frames[1].position.x - object.frames[0].position.x) * frameValue, y: object.frames[0].position.y + (object.frames[1].position.y - object.frames[0].position.y) * frameValue };
@@ -100,7 +121,10 @@ function addObject() {
         },
         animation: {
             activation: 3,
-            loop: 2
+            loop: 2,
+            function: 0,
+            reverse: false,
+            decay: 0
         }
     };
     createObject(object);
@@ -195,12 +219,6 @@ function getUniqueName(str, duplicate = false) {
     return str;
 }
 
-function getAlphaColor(color, opacity) {
-    const op = (Math.round(opacity * 255)).toString(16);
-
-    return (op.length === 2) ? color + op : color + '0' + op;
-}
-
 function setFrame(frame, overrideSlider = false) {
     currentFrame = frame;
 
@@ -265,6 +283,9 @@ function loadObjectData() {
 
     setSelectValue(document.getElementById('object-animation-activation'), selectedObject.animation.activation);
     setSelectValue(document.getElementById('object-animation-loop'), selectedObject.animation.loop);
+    setSelectValue(document.getElementById('object-animation-function'), selectedObject.animation.function);
+    document.getElementById('object-animation-reverse').checked = selectedObject.animation.reverse;
+    setSelectValue(document.getElementById('object-animation-decay'), selectedObject.animation.decay);
 }
 
 function setSelectValue(select, value) {
@@ -364,6 +385,24 @@ function initListeners() {
         selectedObject.animation.loop = parseInt(e.target.options[e.target.selectedIndex].value);
         draw();
     });
+    document.getElementById('object-animation-function').addEventListener('change', (e) => {
+        if ( !selectedObject)
+            return;
+        selectedObject.animation.function = parseInt(e.target.options[e.target.selectedIndex].value);
+        draw();
+    });
+    document.getElementById('object-animation-reverse').addEventListener('change', (e) => {
+        if ( !selectedObject)
+            return;
+        selectedObject.animation.reverse = e.target.checked;
+        draw();
+    });
+    document.getElementById('object-animation-decay').addEventListener('change', (e) => {
+        if ( !selectedObject)
+            return;
+        selectedObject.animation.decay = parseInt(e.target.options[e.target.selectedIndex].value);
+        draw();
+    });
 
     document.getElementById('save-frame').addEventListener('click', (e) => {
         if ( !selectedObject)
@@ -439,6 +478,12 @@ function initScene() {
                     selectObject(e.target.getAttribute('object-id'));
                 });
                 hierarchy.appendChild(elem);
+
+                if ( !objects[i].animation.hasOwnProperty('function')) {
+                    objects[i].animation.function = 0;
+                    objects[i].animation.reverse = false;
+                    objects[i].animation.decay = 0;
+                }
             }
         }
     }
@@ -503,7 +548,7 @@ function generateHash(objects, type) {
     let hash = type * 1234567;
 
     for (let i = objects.length - 1; i !== -1; i--) {
-        hash += i * 1000 + objects[i].type * 5 + objects[i].frames[0].position.x * 30 + objects[i].frames[0].position.y * 82 + objects[i].frames[0].size.x * 4 + objects[i].frames[0].size.y * 34 + objects[i].frames[0].angle * 19 + objects[i].frames[0].opacity * 91 + objects[i].frames[1].position.x * 89 + objects[i].frames[1].position.y * 25 + objects[i].frames[1].size.x * 9 + objects[i].frames[1].size.y * 96 + objects[i].frames[1].angle * 59 + objects[i].frames[1].opacity * 43 + objects[i].visualizer.range[0] * 26 + objects[i].visualizer.range[1] * 39 + (objects[i].visualizer.reverse ? 1 : 0) + objects[i].animation.activation * 40 + objects[i].animation.loop * 50;
+        hash += i * 1000 + objects[i].type * 5 + objects[i].frames[0].position.x * 30 + objects[i].frames[0].position.y * 82 + objects[i].frames[0].size.x * 4 + objects[i].frames[0].size.y * 34 + objects[i].frames[0].angle * 19 + objects[i].frames[0].opacity * 91 + objects[i].frames[1].position.x * 89 + objects[i].frames[1].position.y * 25 + objects[i].frames[1].size.x * 9 + objects[i].frames[1].size.y * 96 + objects[i].frames[1].angle * 59 + objects[i].frames[1].opacity * 43 + objects[i].visualizer.range[0] * 26 + objects[i].visualizer.range[1] * 39 + (objects[i].visualizer.reverse ? 1 : 0) + objects[i].animation.activation * 40 + objects[i].animation.loop * 50 + objects[i].animation.function * 14 + (objects[i].animation.reverse ? 7 : 0) + objects[i].animation.decay * 74;
     }
 
     return hash.toString(36);
